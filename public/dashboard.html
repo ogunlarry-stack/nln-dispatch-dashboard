@@ -1,1 +1,186 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NLN Dispatch Dashboard</title>
+
+<style>
+body {
+font-family: Arial, sans-serif;
+background: #0b1220;
+color: white;
+padding: 20px;
+}
+
+.container {
+max-width: 1200px;
+margin: auto;
+}
+
+.card {
+background: #162033;
+border-radius: 10px;
+padding: 15px;
+margin-bottom: 15px;
+}
+
+input, select, button {
+padding: 10px;
+margin: 5px;
+border-radius: 6px;
+border: none;
+}
+
+button {
+cursor: pointer;
+}
+
+.green { background: #16a34a; }
+.orange { background: #f97316; }
+.purple { background: #7c3aed; }
+.red { background: #dc2626; }
+
+.status {
+display: inline-block;
+padding: 5px 10px;
+background: #334155;
+border-radius: 999px;
+margin-top: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>NLN Dispatch Dashboard</h1>
+
+<!-- CREATE LEAD -->
+<div class="card">
+<h3>Create Lead</h3>
+
+<input id="name" placeholder="Customer Name">
+<input id="phone" placeholder="Phone">
+<input id="service" placeholder="Service">
+
+<select id="serviceType">
+<option value="Locksmith">Locksmith</option>
+<option value="Cleaning">Cleaning</option>
+</select>
+
+<input id="location" placeholder="Location">
+
+<button onclick="createLead()">Create Lead</button>
+</div>
+
+<!-- LEADS -->
+<div id="leads"></div>
+
+</div>
+
+<script>
+
+let leads = [];
+
+async function loadLeads() {
+try {
+const res = await fetch("/api/leads");
+leads = await res.json();
+} catch (e) {
+console.log("API failed — using test data");
+leads = [
+{
+id: 1,
+name: "Test Customer",
+service: "House Lockout",
+location: "Edgewood",
+phone: "4430000000",
+status: "New"
+}
+];
+}
+
+renderLeads();
+}
+
+function renderLeads() {
+const box = document.getElementById("leads");
+box.innerHTML = "";
+
+leads.forEach(lead => {
+const div = document.createElement("div");
+div.className = "card";
+
+div.innerHTML = `
+<h3>${lead.name}</h3>
+<p>Service: ${lead.service}</p>
+<p>Location: ${lead.location}</p>
+<p>Phone: ${lead.phone}</p>
+<div class="status">${lead.status}</div>
+
+<div style="margin-top:10px;">
+<button class="green" onclick="acceptLead(${lead.id})">Accept</button>
+
+<select id="tech-${lead.id}">
+<option value="">Assign Tech</option>
+<option value="Larry">Larry</option>
+<option value="Eli">Eli</option>
+<option value="Max">Max</option>
+</select>
+
+<button class="orange" onclick="assignLead(${lead.id})">Assign</button>
+<button class="purple" onclick="sendSMS(${lead.id})">SMS</button>
+<button class="red" onclick="cancelLead(${lead.id})">Cancel</button>
+</div>
+`;
+
+box.appendChild(div);
+});
+}
+
+async function createLead() {
+const name = document.getElementById("name").value;
+const phone = document.getElementById("phone").value;
+const service = document.getElementById("service").value;
+const serviceType = document.getElementById("serviceType").value;
+const location = document.getElementById("location").value;
+
+try {
+await fetch("/api/new-lead", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ name, phone, service, serviceType, location })
+});
+} catch (e) {
+console.log("API not ready yet");
+}
+
+loadLeads();
+}
+
+function acceptLead(id) {
+alert("Accepted lead " + id);
+}
+
+function assignLead(id) {
+const tech = document.getElementById(`tech-${id}`).value;
+alert("Assigned to " + tech);
+}
+
+function sendSMS(id) {
+alert("SMS sent for lead " + id);
+}
+
+function cancelLead(id) {
+alert("Cancelled lead " + id);
+}
+
+loadLeads();
+
+</script>
+
+</body>
+</html>
