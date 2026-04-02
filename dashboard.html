@@ -1,3 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NLN Dispatch Dashboard</title>
+<style>
+body {
+font-family: Arial, sans-serif;
+background: #0b1220;
+color: white;
+padding: 20px;
+margin: 0;
+}
+
+h1 { margin-bottom: 10px; }
+
+.container {
+max-width: 1200px;
+margin: auto;
+}
+
+.card {
+background: #162033;
+border: 1px solid #203057;
+border-radius: 12px;
+padding: 15px;
+margin-bottom: 15px;
+}
+
+input, select, button {
+padding: 10px;
+margin: 5px;
+border-radius: 8px;
+border: 1px solid #334766;
+}
+
+button {
+cursor: pointer;
+background: #2563eb;
+color: white;
+}
+
+.green { background: #16a34a; }
+.orange { background: #d97706; }
+.purple { background: #7c3aed; }
+.red { background: #dc2626; }
+
+.status {
+display: inline-block;
+padding: 6px 10px;
+border-radius: 999px;
+margin-top: 8px;
+background: #334155;
+}
+
+.grid {
+display: grid;
+grid-template-columns: repeat(5, 1fr);
+gap: 10px;
+}
+
+@media (max-width: 900px) {
+.grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>NLN Dispatch Dashboard</h1>
+<p>Automatic Lead Routing System</p>
+
+<div class="card">
+<h3>Create Auto Lead</h3>
+
+<div class="grid">
+<input id="name" placeholder="Customer Name" />
+<input id="phone" placeholder="Phone" />
+<input id="service" value="House Lockout" />
+
+<select id="serviceType">
+<option value="Locksmith">Locksmith</option>
+<option value="Cleaning">Cleaning</option>
+</select>
+
+<input id="location" value="Edgewood" />
+</div>
+
+<button onclick="createLead()">Create & Auto Route</button>
+</div>
+
+<div id="leads"></div>
+</div>
+
 <script>
 let leads = [];
 
@@ -59,7 +153,6 @@ body: JSON.stringify({ name, phone, service, serviceType, location })
 
 const data = await res.json();
 alert("Routed to: " + (data.routedTo || "None"));
-
 loadLeads();
 }
 
@@ -98,3 +191,5 @@ loadLeads();
 setInterval(loadLeads, 4000);
 loadLeads();
 </script>
+</body>
+</html>
