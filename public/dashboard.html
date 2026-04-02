@@ -1,0 +1,100 @@
+<script>
+let leads = [];
+
+async function loadLeads() {
+const res = await fetch("/api/leads");
+leads = await res.json();
+renderLeads();
+}
+
+function renderLeads() {
+const box = document.getElementById("leads");
+box.innerHTML = "";
+
+leads.forEach((lead) => {
+const div = document.createElement("div");
+div.className = "card";
+
+div.innerHTML = `
+<h3>${lead.name}</h3>
+<p>Service: ${lead.service}</p>
+<p>Location: ${lead.location}</p>
+<p>Phone: ${lead.phone}</p>
+<p>Tech: ${lead.assignedTo || "None"}</p>
+
+<div class="status">${lead.status}</div>
+
+<div style="margin-top:10px;">
+<button class="green" onclick="acceptLead(${lead.id})">Accept</button>
+
+<select id="tech-${lead.id}">
+<option value="">Assign Tech</option>
+<option value="Larry">Larry</option>
+<option value="Eli">Eli</option>
+<option value="Max">Max</option>
+</select>
+
+<button class="orange" onclick="assignLead(${lead.id})">Assign</button>
+<button class="purple" onclick="completeLead(${lead.id})">Complete</button>
+<button class="red" onclick="cancelLead(${lead.id})">Cancel</button>
+</div>
+`;
+
+box.appendChild(div);
+});
+}
+
+async function createLead() {
+const name = document.getElementById("name").value || "New Customer";
+const phone = document.getElementById("phone").value || "0000000000";
+const service = document.getElementById("service").value;
+const serviceType = document.getElementById("serviceType").value;
+const location = document.getElementById("location").value;
+
+const res = await fetch("/api/new-lead", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ name, phone, service, serviceType, location })
+});
+
+const data = await res.json();
+alert("Routed to: " + (data.routedTo || "None"));
+
+loadLeads();
+}
+
+async function acceptLead(id) {
+await fetch(`/api/accept/${id}`, { method: "POST" });
+loadLeads();
+}
+
+async function assignLead(id) {
+const tech = document.getElementById(`tech-${id}`).value;
+
+if (!tech) {
+alert("Pick tech");
+return;
+}
+
+await fetch(`/api/assign/${id}`, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ techName: tech })
+});
+
+loadLeads();
+}
+
+async function completeLead(id) {
+await fetch(`/api/complete/${id}`, { method: "POST" });
+loadLeads();
+}
+
+async function cancelLead(id) {
+await fetch(`/api/cancel/${id}`, { method: "POST" });
+loadLeads();
+}
+
+setInterval(loadLeads, 4000);
+loadLeads();
+</script>
