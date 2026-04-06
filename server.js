@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const twilio = require("twilio");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,14 +8,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
-
-const client = twilio(
-process.env.TWILIO_SID,
-process.env.TWILIO_TOKEN
-);
-
-const TWILIO_FROM = "+18336964193";
-const SMS_TO = "+14435781686";
 
 let leads = [
 {
@@ -63,18 +54,12 @@ createdAt: new Date().toLocaleString()
 };
 
 leads.unshift(newLead);
-
-res.json({
-success: true,
-lead: newLead
-});
+res.json({ success: true, lead: newLead });
 });
 
 app.post("/api/accept/:id", (req, res) => {
 const lead = leads.find(l => String(l.id) === String(req.params.id));
-if (!lead) {
-return res.status(404).json({ success: false, message: "Lead not found" });
-}
+if (!lead) return res.status(404).json({ success: false, message: "Lead not found" });
 
 lead.status = "Accepted";
 res.json({ success: true, lead });
@@ -82,9 +67,7 @@ res.json({ success: true, lead });
 
 app.post("/api/assign/:id", (req, res) => {
 const lead = leads.find(l => String(l.id) === String(req.params.id));
-if (!lead) {
-return res.status(404).json({ success: false, message: "Lead not found" });
-}
+if (!lead) return res.status(404).json({ success: false, message: "Lead not found" });
 
 const { technician } = req.body;
 lead.technician = technician || "Unassigned";
@@ -95,9 +78,7 @@ res.json({ success: true, lead });
 
 app.post("/api/complete/:id", (req, res) => {
 const lead = leads.find(l => String(l.id) === String(req.params.id));
-if (!lead) {
-return res.status(404).json({ success: false, message: "Lead not found" });
-}
+if (!lead) return res.status(404).json({ success: false, message: "Lead not found" });
 
 lead.status = "Completed";
 res.json({ success: true, lead });
@@ -105,48 +86,19 @@ res.json({ success: true, lead });
 
 app.post("/api/cancel/:id", (req, res) => {
 const lead = leads.find(l => String(l.id) === String(req.params.id));
-if (!lead) {
-return res.status(404).json({ success: false, message: "Lead not found" });
-}
+if (!lead) return res.status(404).json({ success: false, message: "Lead not found" });
 
 lead.status = "Cancelled";
 res.json({ success: true, lead });
 });
 
-app.post("/api/sms/:id", async (req, res) => {
+app.post("/api/sms/:id", (req, res) => {
 const lead = leads.find(l => String(l.id) === String(req.params.id));
-if (!lead) {
-return res.status(404).json({ success: false, message: "Lead not found" });
-}
+if (!lead) return res.status(404).json({ success: false, message: "Lead not found" });
 
-try {
-const message = await client.messages.create({
-body: `🚨 NEW JOB
-Service: ${lead.service}
-Location: ${lead.location}
-Customer: ${lead.name}
-Phone: ${lead.phone}
-Tech: ${lead.technician}`,
-from: TWILIO_FROM,
-to: SMS_TO
-});
-
-res.json({
-success: true,
-message: `REAL SMS sent: ${message.sid}`
-});
-} catch (err) {
-res.status(500).json({
-success: false,
-message: err.message
-});
-}
+res.json({ success: true, message: "SMS route working" });
 });
 
 app.listen(PORT, () => {
 console.log(`Server running on port ${PORT}`);
 });
-
-
-
-
