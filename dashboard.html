@@ -1,51 +1,37 @@
+
 <!DOCTYPE html>
 <html>
 <head>
 <title>NLN Dispatch Dashboard</title>
 <style>
 body {
-font-family: Arial;
+font-family: Arial, sans-serif;
 background: #0f172a;
 color: white;
+margin: 0;
 padding: 20px;
 }
-
-h1 {
-margin-bottom: 20px;
-}
-
 .card {
 background: #1e293b;
 padding: 15px;
 border-radius: 10px;
 margin-bottom: 15px;
 }
-
-input {
+input, button, select {
 padding: 8px;
-margin-right: 5px;
-border-radius: 5px;
-border: none;
-}
-
-button {
-padding: 6px 10px;
 margin: 5px;
+border-radius: 6px;
 border: none;
-border-radius: 5px;
-cursor: pointer;
 }
-
+button { cursor: pointer; }
 .green { background: #22c55e; }
-.blue { background: #3b82f6; }
+.blue { background: #3b82f6; color: white; }
 .yellow { background: #f59e0b; }
-.purple { background: #8b5cf6; }
-.red { background: #ef4444; }
+.purple { background: #8b5cf6; color: white; }
+.red { background: #ef4444; color: white; }
 </style>
 </head>
-
 <body>
-
 <h1>NLN Dispatch Dashboard 🚀</h1>
 
 <div class="card">
@@ -60,7 +46,6 @@ cursor: pointer;
 <div id="leads"></div>
 
 <script>
-
 async function loadLeads() {
 const res = await fetch("/api/leads");
 const data = await res.json();
@@ -89,61 +74,8 @@ Time: ${lead.createdAt}<br>
 </select>
 
 <button class="yellow" onclick="sendSMS(${lead.id})">SMS</button>
-<button class="purple" onclick="completeLead(${lead.id})">Complete</button>
-<button class="red" onclick="cancelLead(${lead.id})">Cancel</button>
-</div>
-`;
-});
-}
+<button
 
-async function createLead() {
-const name = document.getElementById("name").value;
-const phone = document.getElementById("phone").value;
-const service = document.getElementById("service").value;
-const location = document.getElementById("location").value;
 
-await fetch("/api/new-lead", {
-method: "POST",
-headers: {"Content-Type": "application/json"},
-body: JSON.stringify({ name, phone, service, location })
-});
 
-loadLeads();
-}
 
-async function acceptLead(id) {
-await fetch(`/api/accept/${id}`, { method: "POST" });
-loadLeads();
-}
-
-async function assignLead(id, tech) {
-await fetch(`/api/assign/${id}`, {
-method: "POST",
-headers: {"Content-Type": "application/json"},
-body: JSON.stringify({ technician: tech })
-});
-loadLeads();
-}
-
-async function completeLead(id) {
-await fetch(`/api/complete/${id}`, { method: "POST" });
-loadLeads();
-}
-
-async function cancelLead(id) {
-await fetch(`/api/cancel/${id}`, { method: "POST" });
-loadLeads();
-}
-
-async function sendSMS(id) {
-const res = await fetch(`/api/sms/${id}`, { method: "POST" });
-const data = await res.json();
-alert(data.message);
-}
-
-loadLeads();
-
-</script>
-
-</body>
-</html>
