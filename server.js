@@ -44,8 +44,8 @@ app.get("/", (req, res) => {
 res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-app.get("/dashboard.html", (req, res) => {
-res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+app.get("/api/leads", (req, res) => {
+res.json(leads);
 });
 
 app.post("/api/new-lead", (req, res) => {
@@ -64,8 +64,6 @@ createdAt: new Date().toLocaleString()
 
 leads.unshift(newLead);
 
-console.log(`Auto assigned ${newLead.name} -> ${newLead.technician}`);
-
 res.json({
 success: true,
 lead: newLead
@@ -74,92 +72,51 @@ lead: newLead
 
 app.post("/api/accept/:id", (req, res) => {
 const lead = leads.find(l => String(l.id) === String(req.params.id));
-
 if (!lead) {
-return res.status(404).json({
-success: false,
-message: "Lead not found"
-});
+return res.status(404).json({ success: false, message: "Lead not found" });
 }
 
 lead.status = "Accepted";
-console.log(`Accepted ${lead.name}`);
-
-res.json({
-success: true,
-lead
-});
+res.json({ success: true, lead });
 });
 
 app.post("/api/assign/:id", (req, res) => {
 const lead = leads.find(l => String(l.id) === String(req.params.id));
-
 if (!lead) {
-return res.status(404).json({
-success: false,
-message: "Lead not found"
-});
+return res.status(404).json({ success: false, message: "Lead not found" });
 }
 
 const { technician } = req.body;
-
 lead.technician = technician || "Unassigned";
 lead.status = "Assigned";
 
-console.log(`Assigned ${lead.name} -> ${lead.technician}`);
-
-res.json({
-success: true,
-lead
-});
+res.json({ success: true, lead });
 });
 
 app.post("/api/complete/:id", (req, res) => {
 const lead = leads.find(l => String(l.id) === String(req.params.id));
-
 if (!lead) {
-return res.status(404).json({
-success: false,
-message: "Lead not found"
-});
+return res.status(404).json({ success: false, message: "Lead not found" });
 }
 
 lead.status = "Completed";
-console.log(`Completed ${lead.name}`);
-
-res.json({
-success: true,
-lead
-});
+res.json({ success: true, lead });
 });
 
 app.post("/api/cancel/:id", (req, res) => {
 const lead = leads.find(l => String(l.id) === String(req.params.id));
-
 if (!lead) {
-return res.status(404).json({
-success: false,
-message: "Lead not found"
-});
+return res.status(404).json({ success: false, message: "Lead not found" });
 }
 
 lead.status = "Cancelled";
-console.log(`Cancelled ${lead.name}`);
-
-res.json({
-success: true,
-lead
-});
+res.json({ success: true, lead });
 });
 
 app.post("/api/sms/:id", async (req, res) => {
 const lead = leads.find(l => String(l.id) === String(req.params.id));
-
 if (!lead) {
-return res.status(404).json({
-success: false,
-message: "Lead not found"
-});
+return res.status(404).json({ success: false, message: "Lead not found" });
 }
 
 try {
@@ -174,15 +131,11 @@ from: TWILIO_FROM,
 to: SMS_TO
 });
 
-console.log("REAL SMS SENT:", message.sid);
-
 res.json({
 success: true,
-message: "REAL SMS sent"
+message: `REAL SMS sent: ${message.sid}`
 });
 } catch (err) {
-console.log("SMS ERROR:", err.message);
-
 res.status(500).json({
 success: false,
 message: err.message
@@ -193,4 +146,7 @@ message: err.message
 app.listen(PORT, () => {
 console.log(`Server running on port ${PORT}`);
 });
+
+
+
 
