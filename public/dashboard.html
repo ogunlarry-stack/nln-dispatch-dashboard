@@ -4,6 +4,10 @@
 <title>NLN Dispatch Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
+* {
+box-sizing: border-box;
+}
+
 body {
 font-family: Arial, sans-serif;
 background: #0f172a;
@@ -13,36 +17,58 @@ padding: 20px;
 }
 
 h1 {
-margin-bottom: 20px;
+margin: 0 0 20px;
+font-size: 40px;
+font-weight: 800;
+}
+
+.wrap {
+max-width: 1200px;
+margin: 0 auto;
 }
 
 .card {
-background: #1e293b;
-padding: 15px;
-border-radius: 12px;
-margin-bottom: 15px;
-border: 1px solid #334155;
+background: linear-gradient(180deg, #223557 0%, #1d2f52 100%);
+border: 1px solid rgba(255,255,255,0.08);
+padding: 18px;
+border-radius: 14px;
+margin-bottom: 16px;
+box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+
+.lead-card {
+margin-top: 12px;
+}
+
+.form-row,
+.button-row {
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+align-items: center;
 }
 
 input, select, button {
-padding: 8px 10px;
-margin: 5px;
-border-radius: 6px;
+padding: 10px 12px;
+border-radius: 8px;
 border: none;
+font-size: 14px;
 }
 
 input, select {
-min-width: 140px;
+min-width: 150px;
+background: #f8fafc;
+color: #111827;
 }
 
 button {
 cursor: pointer;
-font-weight: bold;
+font-weight: 700;
 }
 
 .green {
-background: #22c55e;
-color: black;
+background: #4ade80;
+color: #06230f;
 }
 
 .blue {
@@ -51,8 +77,8 @@ color: white;
 }
 
 .orange {
-background: #f59e0b;
-color: black;
+background: #fbbf24;
+color: #3a2500;
 }
 
 .purple {
@@ -65,27 +91,65 @@ background: #ef4444;
 color: white;
 }
 
-.row {
-margin-top: 10px;
+.muted {
+color: #d1d5db;
+font-size: 14px;
+}
+
+.lead-title {
+font-size: 20px;
+font-weight: 800;
+margin-bottom: 8px;
+}
+
+.lead-line {
+margin-bottom: 4px;
+font-size: 15px;
+}
+
+.status {
+font-weight: 700;
+}
+
+@media (max-width: 700px) {
+h1 {
+font-size: 30px;
+}
+
+input, select, button {
+width: 100%;
+}
+
+.form-row,
+.button-row {
+display: block;
+}
+
+.form-row > *,
+.button-row > * {
+margin-bottom: 10px;
+}
 }
 </style>
 </head>
 <body>
-
+<div class="wrap">
 <h1>NLN Dispatch Dashboard 🚀</h1>
 
 <div class="card">
-<h3>Create Lead</h3>
+<div style="font-size:22px;font-weight:800;margin-bottom:14px;">Create Lead</div>
 
+<div class="form-row">
 <input id="name" placeholder="Customer Name" />
 <input id="phone" placeholder="Phone" />
 <input id="service" placeholder="Service" />
 <input id="location" placeholder="Location" />
-
 <button class="green" onclick="createLead()">Create Lead</button>
+</div>
 </div>
 
 <div id="leads"></div>
+</div>
 
 <script>
 async function loadLeads() {
@@ -97,18 +161,18 @@ container.innerHTML = "";
 
 leads.forEach(lead => {
 const div = document.createElement("div");
-div.className = "card";
+div.className = "card lead-card";
 
 div.innerHTML = `
-<b>${lead.name}</b><br>
-📞 ${lead.phone}<br>
-🔧 ${lead.service}<br>
-📍 ${lead.location}<br>
-Status: ${lead.status}<br>
-Tech: ${lead.technician}<br>
-Time: ${lead.createdAt}<br>
+<div class="lead-title">${lead.name}</div>
+<div class="lead-line">📞 ${lead.phone}</div>
+<div class="lead-line">🔧 ${lead.service}</div>
+<div class="lead-line">📍 ${lead.location}</div>
+<div class="lead-line status">Status: ${lead.status}</div>
+<div class="lead-line">Tech: ${lead.technician}</div>
+<div class="lead-line muted">Time: ${lead.createdAt}</div>
 
-<div class="row">
+<div class="button-row" style="margin-top:14px;">
 <button class="green" onclick="acceptLead(${lead.id})">Accept</button>
 
 <select id="tech-${lead.id}">
@@ -145,6 +209,10 @@ location: document.getElementById("location").value
 const data = await res.json();
 
 if (data.success) {
+document.getElementById("name").value = "";
+document.getElementById("phone").value = "";
+document.getElementById("service").value = "";
+document.getElementById("location").value = "";
 loadLeads();
 } else {
 alert("Create lead failed");
@@ -197,6 +265,6 @@ loadLeads();
 
 loadLeads();
 </script>
-
 </body>
 </html>
+
