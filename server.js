@@ -161,7 +161,12 @@ message: "Lead not found"
 });
 }
 
-if (!process.env.TWILIO_SID || !process.env.TWILIO_TOKEN || !TWILIO_FROM || !TECH_PHONE) {
+if (
+!process.env.TWILIO_SID ||
+!process.env.TWILIO_TOKEN ||
+!process.env.TWILIO_FROM ||
+!process.env.TECH_PHONE
+)
 return res.status(500).json({
 success: false,
 message: "Twilio environment variables are missing"
