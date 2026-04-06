@@ -48,10 +48,6 @@ app.get("/dashboard.html", (req, res) => {
 res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-app.get("/api/leads", (req, res) => {
-res.json(leads);
-});
-
 app.post("/api/new-lead", (req, res) => {
 const { name, phone, service, location } = req.body;
 
