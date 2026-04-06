@@ -1,77 +1,141 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>NLN Dashboard</title>
-</head>
+<title>NLN Dispatch Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+body {
+font-family: Arial;
+background: #0f172a;
+color: white;
+margin: 0;
+padding: 20px;
+}
 
+h1 {
+margin-bottom: 20px;
+}
+
+.card {
+background: #1e293b;
+padding: 15px;
+border-radius: 12px;
+margin-bottom: 15px;
+}
+
+input, select, button {
+padding: 8px;
+margin: 5px;
+border-radius: 6px;
+border: none;
+}
+
+button {
+cursor: pointer;
+background: #22c55e;
+color: black;
+font-weight: bold;
+}
+
+.assign-btn {
+background: #3b82f6;
+color: white;
+}
+
+.sms-btn {
+background: orange;
+}
+</style>
+</head>
 <body>
 
-<h1>NLN Dispatch Dashboard</h1>
+<h1>NLN Dispatch Dashboard 🚀</h1>
 
-<button onclick="createTestLead()">+ Add Test Lead</button>
+<div class="card">
+<h3>Create Lead</h3>
+<input id="name" placeholder="Customer Name">
+<input id="phone" placeholder="Phone">
+<input id="service" placeholder="Service">
+<input id="location" placeholder="Location">
+<button onclick="createLead()">Create Lead</button>
+</div>
 
 <div id="leads"></div>
 
 <script>
-
 async function loadLeads() {
-const res = await fetch('/api/leads');
-const data = await res.json();
+const res = await fetch("/api/leads");
+const leads = await res.json();
 
-const box = document.getElementById('leads');
-box.innerHTML = '';
+const container = document.getElementById("leads");
+container.innerHTML = "";
 
-data.forEach(lead => {
-const div = document.createElement('div');
+leads.forEach(lead => {
+const div = document.createElement("div");
+div.className = "card";
 
 div.innerHTML = `
-<hr>
-<h3>${lead.name}</h3>
-<p>${lead.service}</p>
-<p>${lead.location}</p>
-<p>Status: ${lead.status}</p>
+<b>${lead.name}</b><br>
+📞 ${lead.phone}<br>
+🔧 ${lead.service}<br>
+📍 ${lead.location}<br>
+Status: ${lead.status}<br>
+Tech: ${lead.technician}<br><br>
 
-<button onclick="accept(${lead.id})">Accept</button>
-<button onclick="complete(${lead.id})">Complete</button>
-<button onclick="cancel(${lead.id})">Cancel</button>
+<button onclick="acceptLead(${lead.id})">Accept</button>
+
+<select id="tech-${lead.id}">
+<option value="Larry">Larry</option>
+<option value="Eli">Eli</option>
+<option value="Max">Max</option>
+</select>
+
+<button class="assign-btn" onclick="assignLead(${lead.id})">Assign</button>
+<button class="sms-btn" onclick="sendSMS(${lead.id})">SMS</button>
 `;
 
-box.appendChild(div);
+container.appendChild(div);
 });
 }
 
-async function createTestLead() {
-await fetch('/api/new-lead', {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
+async function createLead() {
+await fetch("/api/new-lead", {
+method: "POST",
+headers: {"Content-Type": "application/json"},
 body: JSON.stringify({
-name: "Test Customer",
-phone: "123",
-service: "Lockout",
-location: "Edgewood"
+name: name.value,
+phone: phone.value,
+service: service.value,
+location: location.value
 })
 });
 
 loadLeads();
 }
 
-async function accept(id) {
-await fetch('/api/accept/' + id, { method: 'POST' });
+async function acceptLead(id) {
+await fetch(`/api/accept/${id}`, { method: "POST" });
 loadLeads();
 }
 
-async function complete(id) {
-await fetch('/api/complete/' + id, { method: 'POST' });
+async function assignLead(id) {
+const tech = document.getElementById(`tech-${id}`).value;
+
+await fetch(`/api/assign/${id}`, {
+method: "POST",
+headers: {"Content-Type": "application/json"},
+body: JSON.stringify({ technician: tech })
+});
+
 loadLeads();
 }
 
-async function cancel(id) {
-await fetch('/api/cancel/' + id, { method: 'POST' });
-loadLeads();
+async function sendSMS(id) {
+await fetch(`/api/sms/${id}`, { method: "POST" });
+alert("SMS Sent (demo)");
 }
 
 loadLeads();
-
 </script>
 
 </body>
