@@ -4,25 +4,9 @@
 <head>
 <title>NLN Dispatch Dashboard</title>
 <style>
-body {
-font-family: Arial, sans-serif;
-background: #0f172a;
-color: white;
-margin: 0;
-padding: 20px;
-}
-.card {
-background: #1e293b;
-padding: 15px;
-border-radius: 10px;
-margin-bottom: 15px;
-}
-input, button, select {
-padding: 8px;
-margin: 5px;
-border-radius: 6px;
-border: none;
-}
+body { font-family: Arial, sans-serif; background: #0f172a; color: white; margin: 0; padding: 20px; }
+.card { background: #1e293b; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+input, button, select { padding: 8px; margin: 5px; border-radius: 6px; border: none; }
 button { cursor: pointer; }
 .green { background: #22c55e; }
 .blue { background: #3b82f6; color: white; }
@@ -74,8 +58,62 @@ Time: ${lead.createdAt}<br>
 </select>
 
 <button class="yellow" onclick="sendSMS(${lead.id})">SMS</button>
-<button
+<button class="purple" onclick="completeLead(${lead.id})">Complete</button>
+<button class="red" onclick="cancelLead(${lead.id})">Cancel</button>
+</div>
+`;
+});
+}
 
+async function createLead() {
+const res = await fetch("/api/new-lead", {
+method: "POST",
+headers: {"Content-Type": "application/json"},
+body: JSON.stringify({
+name: document.getElementById("name").value,
+phone: document.getElementById("phone").value,
+service: document.getElementById("service").value,
+location: document.getElementById("location").value
+})
+});
 
+const data = await res.json();
+if (!data.success) alert("Create lead failed");
+loadLeads();
+}
 
+async function acceptLead(id) {
+await fetch(`/api/accept/${id}`, { method: "POST" });
+loadLeads();
+}
 
+async function assignLead(id, tech) {
+if (!tech || tech === "Select Tech") return;
+await fetch(`/api/assign/${id}`, {
+method: "POST",
+headers: {"Content-Type": "application/json"},
+body: JSON.stringify({ technician: tech })
+});
+loadLeads();
+}
+
+async function completeLead(id) {
+await fetch(`/api/complete/${id}`, { method: "POST" });
+loadLeads();
+}
+
+async function cancelLead(id) {
+await fetch(`/api/cancel/${id}`, { method: "POST" });
+loadLeads();
+}
+
+async function sendSMS(id) {
+const res = await fetch(`/api/sms/${id}`, { method: "POST" });
+const data = await res.json();
+alert(data.message);
+}
+
+loadLeads();
+</script>
+</body>
+</html>
