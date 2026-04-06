@@ -120,7 +120,6 @@ message: "Lead not found"
 }
 
 lead.status = "Completed";
-
 console.log(`Completed ${lead.name}`);
 
 res.json({
@@ -140,7 +139,6 @@ message: "Lead not found"
 }
 
 lead.status = "Cancelled";
-
 console.log(`Cancelled ${lead.name}`);
 
 res.json({
