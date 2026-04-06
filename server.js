@@ -15,9 +15,6 @@ process.env.TWILIO_SID,
 process.env.TWILIO_TOKEN
 );
 
-const TWILIO_FROM = process.env.TWILIO_FROM;
-const TECH_PHONE = process.env.TECH_PHONE;
-
 let leads = [
 {
 id: 1,
@@ -67,8 +64,6 @@ createdAt: new Date().toLocaleString()
 };
 
 leads.unshift(newLead);
-
-console.log(`Auto assigned ${newLead.name} -> ${newLead.technician}`);
 
 res.json({
 success: true,
@@ -166,7 +161,7 @@ if (
 !process.env.TWILIO_TOKEN ||
 !process.env.TWILIO_FROM ||
 !process.env.TECH_PHONE
-)
+) {
 return res.status(500).json({
 success: false,
 message: "Twilio environment variables are missing"
@@ -181,8 +176,8 @@ Location: ${lead.location}
 Customer: ${lead.name}
 Phone: ${lead.phone}
 Tech: ${lead.technician}`,
-from: TWILIO_FROM,
-to: TECH_PHONE
+from: process.env.TWILIO_FROM,
+to: process.env.TECH_PHONE
 });
 
 console.log("REAL SMS SENT:", message.sid);
