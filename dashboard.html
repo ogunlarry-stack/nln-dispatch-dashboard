@@ -1,195 +1,202 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>NLN Dispatch Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
 body {
 font-family: Arial, sans-serif;
-background: #0b1220;
+background: #0f172a;
 color: white;
-padding: 20px;
 margin: 0;
+padding: 20px;
 }
 
-h1 { margin-bottom: 10px; }
-
-.container {
-max-width: 1200px;
-margin: auto;
+h1 {
+margin-bottom: 20px;
 }
 
 .card {
-background: #162033;
-border: 1px solid #203057;
-border-radius: 12px;
+background: #1e293b;
 padding: 15px;
+border-radius: 12px;
 margin-bottom: 15px;
+border: 1px solid #334155;
 }
 
 input, select, button {
-padding: 10px;
+padding: 8px 10px;
 margin: 5px;
-border-radius: 8px;
-border: 1px solid #334766;
+border-radius: 6px;
+border: none;
+}
+
+input, select {
+min-width: 140px;
 }
 
 button {
 cursor: pointer;
-background: #2563eb;
+font-weight: bold;
+}
+
+.green {
+background: #22c55e;
+color: black;
+}
+
+.blue {
+background: #3b82f6;
 color: white;
 }
 
-.green { background: #16a34a; }
-.orange { background: #d97706; }
-.purple { background: #7c3aed; }
-.red { background: #dc2626; }
-
-.status {
-display: inline-block;
-padding: 6px 10px;
-border-radius: 999px;
-margin-top: 8px;
-background: #334155;
+.orange {
+background: #f59e0b;
+color: black;
 }
 
-.grid {
-display: grid;
-grid-template-columns: repeat(5, 1fr);
-gap: 10px;
+.purple {
+background: #8b5cf6;
+color: white;
 }
 
-@media (max-width: 900px) {
-.grid { grid-template-columns: 1fr; }
+.red {
+background: #ef4444;
+color: white;
+}
+
+.row {
+margin-top: 10px;
 }
 </style>
 </head>
 <body>
-<div class="container">
-<h1>NLN Dispatch Dashboard</h1>
-<p>Automatic Lead Routing System</p>
+
+<h1>NLN Dispatch Dashboard 🚀</h1>
 
 <div class="card">
-<h3>Create Auto Lead</h3>
+<h3>Create Lead</h3>
 
-<div class="grid">
 <input id="name" placeholder="Customer Name" />
 <input id="phone" placeholder="Phone" />
-<input id="service" value="House Lockout" />
+<input id="service" placeholder="Service" />
+<input id="location" placeholder="Location" />
 
-<select id="serviceType">
-<option value="Locksmith">Locksmith</option>
-<option value="Cleaning">Cleaning</option>
-</select>
-
-<input id="location" value="Edgewood" />
-</div>
-
-<button onclick="createLead()">Create & Auto Route</button>
+<button class="green" onclick="createLead()">Create Lead</button>
 </div>
 
 <div id="leads"></div>
-</div>
 
 <script>
-let leads = [];
-
 async function loadLeads() {
 const res = await fetch("/api/leads");
-leads = await res.json();
-renderLeads();
-}
+const leads = await res.json();
 
-function renderLeads() {
-const box = document.getElementById("leads");
-box.innerHTML = "";
+const container = document.getElementById("leads");
+container.innerHTML = "";
 
-leads.forEach((lead) => {
+leads.forEach(lead => {
 const div = document.createElement("div");
 div.className = "card";
 
 div.innerHTML = `
-<h3>${lead.name}</h3>
-<p>Service: ${lead.service}</p>
-<p>Location: ${lead.location}</p>
-<p>Phone: ${lead.phone}</p>
-<p>Tech: ${lead.assignedTo || "None"}</p>
+<b>${lead.name}</b><br>
+📞 ${lead.phone}<br>
+🔧 ${lead.service}<br>
+📍 ${lead.location}<br>
+Status: ${lead.status}<br>
+Tech: ${lead.technician}<br>
+Time: ${lead.createdAt}<br>
 
-<div class="status">${lead.status}</div>
-
-<div style="margin-top:10px;">
+<div class="row">
 <button class="green" onclick="acceptLead(${lead.id})">Accept</button>
 
 <select id="tech-${lead.id}">
-<option value="">Assign Tech</option>
 <option value="Larry">Larry</option>
 <option value="Eli">Eli</option>
 <option value="Max">Max</option>
 </select>
 
-<button class="orange" onclick="assignLead(${lead.id})">Assign</button>
+<button class="blue" onclick="assignLead(${lead.id})">Assign</button>
+<button class="orange" onclick="sendSMS(${lead.id})">SMS</button>
 <button class="purple" onclick="completeLead(${lead.id})">Complete</button>
 <button class="red" onclick="cancelLead(${lead.id})">Cancel</button>
 </div>
 `;
 
-box.appendChild(div);
+container.appendChild(div);
 });
 }
 
 async function createLead() {
-const name = document.getElementById("name").value || "New Customer";
-const phone = document.getElementById("phone").value || "0000000000";
-const service = document.getElementById("service").value;
-const serviceType = document.getElementById("serviceType").value;
-const location = document.getElementById("location").value;
-
 const res = await fetch("/api/new-lead", {
 method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ name, phone, service, serviceType, location })
+headers: {
+"Content-Type": "application/json"
+},
+body: JSON.stringify({
+name: document.getElementById("name").value,
+phone: document.getElementById("phone").value,
+service: document.getElementById("service").value,
+location: document.getElementById("location").value
+})
 });
 
 const data = await res.json();
-alert("Routed to: " + (data.routedTo || "None"));
+
+if (data.success) {
 loadLeads();
+} else {
+alert("Create lead failed");
+}
 }
 
 async function acceptLead(id) {
-await fetch(`/api/accept/${id}`, { method: "POST" });
+await fetch(`/api/accept/${id}`, {
+method: "POST"
+});
 loadLeads();
 }
 
 async function assignLead(id) {
 const tech = document.getElementById(`tech-${id}`).value;
 
-if (!tech) {
-alert("Pick tech");
-return;
-}
-
 await fetch(`/api/assign/${id}`, {
 method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ techName: tech })
+headers: {
+"Content-Type": "application/json"
+},
+body: JSON.stringify({ technician: tech })
 });
 
 loadLeads();
 }
 
+async function sendSMS(id) {
+const res = await fetch(`/api/sms/${id}`, {
+method: "POST"
+});
+
+const data = await res.json();
+alert(data.message || "SMS done");
+}
+
 async function completeLead(id) {
-await fetch(`/api/complete/${id}`, { method: "POST" });
+await fetch(`/api/complete/${id}`, {
+method: "POST"
+});
 loadLeads();
 }
 
 async function cancelLead(id) {
-await fetch(`/api/cancel/${id}`, { method: "POST" });
+await fetch(`/api/cancel/${id}`, {
+method: "POST"
+});
 loadLeads();
 }
 
-setInterval(loadLeads, 4000);
 loadLeads();
 </script>
+
 </body>
 </html>
